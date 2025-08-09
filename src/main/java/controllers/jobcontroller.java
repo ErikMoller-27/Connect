@@ -27,10 +27,34 @@ public class jobcontroller {
                 new Job("Data Analyst","Macquarie","Sydney",
                         "Analyze datasets and build dashboards.", new double[]{60,88,72,55,40,65}),
                 new Job("UX Researcher","QUT","Brisbane",
-                        "Run user studies and design research.", new double[]{50,65,85,70,60,45})
-        );
+                        "Run user studies and design research.", new double[]{50,65,85,70,60,45}),
+                new Job("Product Manager","Google","Sydney",
+                        "Lead product development cycles.", new double[]{75,60,70,80,65,70}),
+                new Job("DevOps Engineer","Amazon","Melbourne",
+                        "Manage cloud infrastructure.", new double[]{80,85,75,60,70,65}),
+                new Job("Marketing Specialist","Facebook","Sydney",
+                        "Drive marketing campaigns.", new double[]{60,70,65,75,80,55}),
+                new Job("Sales Associate","Apple","Brisbane",
+                        "Manage client accounts.", new double[]{65,60,70,80,75,60}),
+                new Job("HR Manager","Microsoft","Sydney",
+                        "Lead HR initiatives.", new double[]{70,75,80,65,60,70}),
+                new Job("Business Analyst","Deloitte","Melbourne",
+                        "Analyze business processes.", new double[]{65,70,60,75,80,70}),
+                new Job("Graphic Designer","Adobe","Sydney",
+                        "Create visual content.", new double[]{85,70,60,55,65,75}),
+                new Job("ACS ICT Professional","Australian Computer Society","Brisbane",
+                        "Assess ICT skills and provide certification aligned with Australian standards.",
+                        new double[]{75, 80, 70, 65, 60, 55}),
+                new Job("Cybersecurity Analyst","Cisco","Sydney",
+                        "Protect systems and networks from cyber threats and vulnerabilities.",
+                        new double[]{85, 90, 80, 75, 70, 65}),
+                new Job("Cloud Solutions Architect","AWS","Melbourne",
+                        "Design and implement scalable cloud infrastructure and services.",
+                        new double[]{90, 85, 75, 80, 70, 60})
+                );
 
-        joblist.setItems(FXCollections.observableArrayList(jobs));
+
+                joblist.setItems(FXCollections.observableArrayList(jobs));
         joblist.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Job job, boolean empty) {
