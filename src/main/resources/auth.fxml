@@ -2,20 +2,17 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="authcontroller"
-      spacing="20" alignment="CENTER" style="-fx-padding: 40;">
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.authcontroller"
+      spacing="10"
+      alignment="CENTER">
 
-    <Label text="RadialMatch" style="-fx-font-size: 28; -fx-font-weight: bold;"/>
-
-    <VBox spacing="5" alignment="CENTER_LEFT">
-        <Label text="Enter your first and last name:"/>
-        <TextField fx:id="nameField" styleClass="name-field"/>
-    </VBox>
-
-    <HBox spacing="20" alignment="CENTER">
-        <Button fx:id="loginButton" text="Login" onAction="#handleAuth" styleClass="auth-button"/>
-        <Button fx:id="signupButton" text="Sign Up" onAction="#handleAuth" styleClass="auth-button"/>
+    <Label text="Welcome to RadialMatch" style="-fx-font-size: 20;"/>
+    <TextField fx:id="usernameField" promptText="Enter username"/>
+    <HBox spacing="10" alignment="CENTER">
+        <Button fx:id="loginButton" text="Login" onAction="#handleLogin"/>
+        <Button fx:id="signupButton" text="Sign Up" onAction="#handleSignup"/>
     </HBox>
 </VBox>

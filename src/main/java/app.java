@@ -10,12 +10,25 @@ public class app {
     }
 
     public static class MainApp extends Application {
+        private static Stage primaryStage;
+
         @Override
-        public void start(Stage primaryStage) throws Exception {
-            Parent root = FXMLLoader.load(getClass().getResource("/auth.fxml"));
-            primaryStage.setTitle("RadialMatch");
+        public void start(Stage stage) throws Exception {
+            primaryStage = stage;
+            showAuthScreen();
+        }
+
+        public static void showAuthScreen() throws Exception {
+            Parent root = FXMLLoader.load(MainApp.class.getResource("/auth.fxml"));
+            primaryStage.setTitle("RadialMatch - Login");
             primaryStage.setScene(new Scene(root, 400, 400));
             primaryStage.show();
+        }
+
+        public static void showMainScreen() throws Exception {
+            Parent root = FXMLLoader.load(MainApp.class.getResource("/main.fxml"));
+            primaryStage.setTitle("RadialMatch - Main");
+            primaryStage.setScene(new Scene(root, 800, 600));
         }
     }
 }
