@@ -1,4 +1,5 @@
 package utils;
+
 import utils.textextractor.ExtractionResult;
 
 import java.nio.file.Path;
