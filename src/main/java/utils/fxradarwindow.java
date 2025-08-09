@@ -2,34 +2,45 @@ package utils;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
-public class fxradarwindow {
-    private static volatile boolean started = false;
+public final class fxradarwindow {
+    private static volatile boolean fxStarted = false;
 
-    public static void show(Map<String,Integer> scores) {
-        ensureFX();
+    private static void ensureFxStarted() {
+        if (fxStarted) return;
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.startup(() -> { fxStarted = true; latch.countDown(); });
+        try { latch.await(); } catch (InterruptedException ignored) {}
+    }
+
+    /** Show the radar and block until the window is closed. */
+    public static void showAndWait(Map<String, Integer> scores) {
+        ensureFxStarted();
+        CountDownLatch closed = new CountDownLatch(1);
+
         Platform.runLater(() -> {
             Stage stage = new Stage();
-            stage.setTitle("Career Radar");
             radarview view = new radarview();
             view.setScores(scores);
-            Scene scene = new Scene(view, 720, 560, Color.WHITE);
+
+            StackPane root = new StackPane(view);
+            Scene scene = new Scene(root, 820, 620, Color.WHITE);
+
+            stage.setTitle("Career Radar");
             stage.setScene(scene);
+            stage.setOnShown(e -> view.play());     // animate on show
+            stage.setOnCloseRequest(e -> closed.countDown());
             stage.show();
-            view.play(); // animate
         });
+
+        try { closed.await(); } catch (InterruptedException ignored) {}
     }
 
-    private static void ensureFX() {
-        if (started) return;
-        synchronized (fxradarwindow.class) {
-            if (started) return;
-            Platform.startup(() -> {}); // initialize JavaFX toolkit once
-            started = true;
-        }
-    }
+    private fxradarwindow() {}
 }

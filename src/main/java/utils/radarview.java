@@ -57,7 +57,7 @@ public class radarview extends Pane {
         tl.play();
     }
 
-    public void play() { play(Duration.seconds(1.2)); }
+    public void play() { play(Duration.seconds(3)); }
 
     // --- drawing ---
     private void draw() {
@@ -90,25 +90,25 @@ public class radarview extends Pane {
             fillRingWedge(g, cx, cy, outer, innerBase, start, segAngle);
         }
 
-        // data wedges
+        // data wedges (grow from innerBase outward)
         for (int i = 0; i < 6; i++) {
             double p = clamp(progress[i].get(), 0, 1);
             if (p <= 0) continue;
             double start = -90 + i * segAngle;
 
-            // thickness scales with p
+            // thickness scales with p, extend OUTWARD from innerBase
             double t = maxThickness * p;
-            double inner = outer - t;
+            double outerFilled = innerBase + t;  // outward growth
+            double inner = innerBase;
 
-            // fill
-            g.setFill(Color.rgb(30,144,255, 0.65)); // dodgerblue-ish with alpha
-            fillRingWedge(g, cx, cy, outer, inner, start, segAngle);
+            g.setFill(Color.rgb(30,144,255, 0.65));
+            fillRingWedge(g, cx, cy, outerFilled, inner, start, segAngle);
 
-            // outline
             g.setStroke(Color.rgb(30,144,255));
             g.setLineWidth(2);
-            strokeRingWedge(g, cx, cy, outer, inner, start, segAngle);
+            strokeRingWedge(g, cx, cy, outerFilled, inner, start, segAngle);
         }
+
 
         // separators
         g.setStroke(Color.rgb(0,0,0,0.20));
