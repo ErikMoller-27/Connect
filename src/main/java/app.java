@@ -4,25 +4,40 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class app {
-    public static void main(String[] args) {
-        Application.launch(MainApp.class, args);
+public class app extends Application {
+    private static Stage primaryStage; // Store the primary stage
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        this.primaryStage = primaryStage;
+        showLoginScreen(); // Start with login screen
     }
 
-    public static class MainApp extends Application {
-        @Override
-        public void start(Stage primaryStage) throws Exception {
-            // Load CSS separately to avoid FXML issues
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/profile.fxml"));
-            Parent root = loader.load();
-
-            // Apply CSS programmatically
-            Scene scene = new Scene(root, 800, 600);
-            scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-
-            primaryStage.setTitle("Career Analyzer");
-            primaryStage.setScene(scene);
+    public void showLoginScreen() {
+        try {
+            // Load login.fxml from resources folder
+            Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
+            primaryStage.setTitle("Login");
+            primaryStage.setScene(new Scene(root));
             primaryStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    // Call this method after successful login
+    public static void showMainScreen() {
+        try {
+            Parent root = FXMLLoader.load(app.class.getResource("/profile.fxml"));
+            primaryStage.setTitle("Main App");
+            primaryStage.setScene(new Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        // Fix JavaFX warning by calling launch() properly
+        launch(args);
     }
 }
