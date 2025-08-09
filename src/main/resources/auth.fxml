@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="authcontroller"
+      spacing="20" alignment="CENTER" style="-fx-padding: 40;">
+
+    <Label text="RadialMatch" style="-fx-font-size: 28; -fx-font-weight: bold;"/>
+
+    <VBox spacing="5" alignment="CENTER_LEFT">
+        <Label text="Enter your first and last name:"/>
+        <TextField fx:id="nameField" styleClass="name-field"/>
+    </VBox>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Button fx:id="loginButton" text="Login" onAction="#handleAuth" styleClass="auth-button"/>
+        <Button fx:id="signupButton" text="Sign Up" onAction="#handleAuth" styleClass="auth-button"/>
+    </HBox>
+</VBox>
