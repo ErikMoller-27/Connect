@@ -28,7 +28,7 @@ public class app extends Application {
     // Call this method after successful login
     public static void showMainScreen() {
         try {
-            Parent root = FXMLLoader.load(app.class.getResource("/profile.fxml"));
+            Parent root = FXMLLoader.load(app.class.getResource("/resources/profile.fxml"));
             primaryStage.setTitle("Main App");
             primaryStage.setScene(new Scene(root));
         } catch (Exception e) {

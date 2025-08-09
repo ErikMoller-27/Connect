@@ -20,7 +20,7 @@ public class authcontroller {
             currentStage.close();
 
             // Open main application
-            Parent root = FXMLLoader.load(getClass().getResource("/main.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/resources/main.fxml"));
             Stage stage = new Stage();
             stage.setTitle("RadialMatch - Welcome " + fullName);
             stage.setScene(new Scene(root, 800, 600));
