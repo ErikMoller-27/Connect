@@ -4,19 +4,26 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/17"
+<HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="controllers.jobcontroller"
-      spacing="10">
+      spacing="15">
 
-    <padding>
-        <Insets top="15" right="15" bottom="15" left="15"/>
-    </padding>
-
-    <HBox spacing="10" style="-fx-padding: 15;" alignment="CENTER_LEFT">
-        <TextField fx:id="searchfield" promptText="Search jobs..." prefWidth="300"/>
+    <VBox spacing="10" prefWidth="250" style="-fx-padding: 15;">
+        <TextField fx:id="searchfield" promptText="Search jobs..." prefWidth="230"/>
         <Button text="Search" onAction="#handlesearch"/>
-    </HBox>
+        <ListView fx:id="joblist" prefHeight="400" prefWidth="230"/>
+    </VBox>
 
-    <ListView fx:id="joblist"/>
-</VBox>
+    <VBox spacing="10" style="-fx-padding: 15;" prefWidth="400">
+        <Label fx:id="jobTitle" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Select a job"/>
+        <Label fx:id="jobCompany" style="-fx-font-style: italic;" text=""/>
+        <TextArea fx:id="jobDescription" editable="false" wrapText="true" prefHeight="150"/>
+
+        <!-- Placeholder for the graph area -->
+        <Pane fx:id="graphPlaceholder" prefHeight="200" style="-fx-border-color: gray; -fx-border-width: 2; -fx-background-color: #f0f0f0;">
+            <Label text="Graph placeholder" style="-fx-text-fill: gray; -fx-font-style: italic;"/>
+        </Pane>
+    </VBox>
+
+</HBox>
