@@ -1,11 +1,11 @@
-package com.yourcompany;
+package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.collections.FXCollections;
 
-public class JobsController {
+public class jobcontroller {
     @FXML private ListView<String> jobsList;
     @FXML private TextField searchField;
 

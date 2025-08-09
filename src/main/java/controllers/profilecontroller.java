@@ -1,4 +1,4 @@
-package com.yourcompany;
+package controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.chart.PieChart;
@@ -7,7 +7,7 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.Arrays;
 
-public class ProfileController {
+public class profilecontroller {
     @FXML private PieChart radialChart;
     @FXML private ListView<String> documentList;
     @FXML private TabPane mainTabPane;
