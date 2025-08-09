@@ -1,38 +1,28 @@
-import DAO.userdao;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class app extends Application {
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/path/to/your.fxml"));
-        primaryStage.setTitle("Your Application");
-        primaryStage.setScene(new Scene(root));
-        primaryStage.show();
-
-        // Optional: Test database connection on startup
-        testDatabaseConnection();
-    }
-
+public class app {
     public static void main(String[] args) {
-        launch(args);
+        Application.launch(MainApp.class, args);
     }
 
-    private void testDatabaseConnection() {
-        try {
-            userdao userDao = new userdao();
-            userDao.initializeTables();
-            System.out.println("Database connection successful!");
+    public static class MainApp extends Application {
+        @Override
+        public void start(Stage primaryStage) throws Exception {
+            // Load CSS separately to avoid FXML issues
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/profile.fxml"));
+            Parent root = loader.load();
 
-            // Simple CRUD test
-            int userId = userDao.createUser("Test User");
-            System.out.println("Created user with ID: " + userId);
-        } catch (Exception e) {
-            System.err.println("Database connection failed:");
-            e.printStackTrace();
+            // Apply CSS programmatically
+            Scene scene = new Scene(root, 800, 600);
+            scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+
+            primaryStage.setTitle("Career Analyzer");
+            primaryStage.setScene(scene);
+            primaryStage.show();
         }
     }
 }
