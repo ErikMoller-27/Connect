@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="jobcontroller">
+      fx:controller="controllers.jobcontroller"
+      spacing="10">
 
-    <HBox style="-fx-padding: 15; -fx-spacing: 10;">
-        <TextField fx:id="searchfield"
-                   promptText="Search jobs..."
-                   style="-fx-pref-width: 300;"/>
-        <Button text="Search"
-                onAction="#handlesearch"/>
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15"/>
+    </padding>
+
+    <HBox spacing="10" style="-fx-padding: 15;" alignment="CENTER_LEFT">
+        <TextField fx:id="searchfield" promptText="Search jobs..." prefWidth="300"/>
+        <Button text="Search" onAction="#handlesearch"/>
     </HBox>
 
     <ListView fx:id="joblist"/>
