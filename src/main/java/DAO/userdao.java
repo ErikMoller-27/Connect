@@ -96,4 +96,19 @@ public class userdao {
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(dbUrl);
     }
+
+    public int getUserIdByName(String firstName) throws SQLException {
+        String sql = "SELECT userId FROM users WHERE firstName = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, firstName);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("userId");
+            } else {
+                return -1; // Not found
+            }
+        }
+    }
+
 }

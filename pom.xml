@@ -95,10 +95,10 @@
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
         <configuration>
-          <mainClass>app</mainClass>
-          <launcher>app</launcher>
-          <jlinkZipName>app</jlinkZipName>
-          <jlinkImageName>app</jlinkImageName>
+          <mainClass>app.app</mainClass>
+          <launcher>app.app</launcher>
+          <jlinkZipName>app.app</jlinkZipName>
+          <jlinkImageName>app.app</jlinkImageName>
           <noManPages>true</noManPages>
           <stripDebug>true</stripDebug>
           <noHeaderFiles>true</noHeaderFiles>
