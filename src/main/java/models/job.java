@@ -1,6 +1,7 @@
 package models;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class job {
     private final int companyId;
@@ -26,51 +27,33 @@ public class job {
             this.userCount = 1;
         }
 
-        // Smart average update
-        public void updateAverage(double newPercentage) {
-            this.avgPercentage =
-                    ((avgPercentage * userCount) + newPercentage) / (userCount + 1);
-            userCount++;
-        }
-
         // Getters
         public String getTitle() { return title; }
         public String getDescription() { return description; }
         public double getAvgPercentage() { return avgPercentage; }
         public int getUserCount() { return userCount; }
 
-        @Override
-        public String toString() {
-            return String.format("%s (%.1f%%, %d users): %s",
-                    title, avgPercentage, userCount,
-                    description.substring(0, Math.min(30, description.length())) + "...");
+        // For updating averages
+        public void updateAverage(double newPercentage) {
+            this.avgPercentage = ((avgPercentage * userCount) + newPercentage) / (userCount + 1);
+            userCount++;
         }
     }
 
-    // Add or update job
-    public void addOrUpdateJob(String title, String description, double percentage) {
+    public void addJob(String title, String description, double avgPercentage) {
         jobs.stream()
                 .filter(j -> j.getTitle().equalsIgnoreCase(title))
                 .findFirst()
                 .ifPresentOrElse(
-                        job -> job.updateAverage(percentage),
-                        () -> jobs.add(new JobListing(title, description, percentage))
+                        job -> job.updateAverage(avgPercentage),
+                        () -> jobs.add(new JobListing(title, description, avgPercentage))
                 );
     }
 
-    // Get jobs sorted by best match
-    public List<JobListing> getJobsSorted() {
-        jobs.sort(Comparator.comparingDouble(JobListing::getAvgPercentage).reversed());
-        return Collections.unmodifiableList(jobs);
+    public List<JobListing> getJobs() {
+        return new ArrayList<>(jobs);
     }
 
-    // Getters
     public int getCompanyId() { return companyId; }
     public String getCompanyName() { return companyName; }
-
-    @Override
-    public String toString() {
-        return String.format("Company[ID: %d, Name: %s, Jobs: %s]",
-                companyId, companyName, jobs);
-    }
 }

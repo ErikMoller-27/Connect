@@ -5,54 +5,30 @@ import java.util.*;
 public class user {
     private final int userId;
     private final String firstName;
-    private final List<Skill> skills;
+    private final Map<String, Integer> skills;
 
     public user(int userId, String firstName) {
         this.userId = userId;
         this.firstName = firstName;
-        this.skills = new ArrayList<>();
+        this.skills = new HashMap<>();
     }
 
-    public static class Skill {
-        private final String subject;
-        private final int percentage;
-
-        public Skill(String subject, int percentage) {
-            this.subject = subject;
-            this.percentage = percentage;
-        }
-
-        public String getSubject() { return subject; }
-        public int getPercentage() { return percentage; }
-
-        @Override
-        public String toString() {
-            return String.format("%s: %d%%", subject, percentage);
-        }
+    // Single skill addition
+    public void addSkill(String subject, int percentage) {
+        skills.put(subject, percentage);
     }
 
-    // Bulk skill addition
+    // Bulk skills addition
     public void addSkills(Map<String, Integer> skills) {
-        skills.forEach((subject, percentage) ->
-                this.skills.add(new Skill(subject, percentage))
-        );
-    }
-
-    // Immutable view of skills
-    public List<Skill> getSkills() {
-        return Collections.unmodifiableList(skills);
-    }
-
-    // Skill search
-    public Optional<Skill> findSkill(String subject) {
-        return skills.stream()
-                .filter(s -> s.getSubject().equalsIgnoreCase(subject))
-                .findFirst();
+        this.skills.putAll(skills);
     }
 
     // Getters
     public int getUserId() { return userId; }
     public String getFirstName() { return firstName; }
+    public Map<String, Integer> getSkills() {
+        return Collections.unmodifiableMap(skills);
+    }
 
     @Override
     public String toString() {

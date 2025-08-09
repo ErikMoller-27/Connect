@@ -1,41 +1,46 @@
 package DAO;
 
-import utils.databaseconnection;
-
+import models.job;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class jobdao {
-    private static final String CREATE_COMPANIES_TABLE = """
-        CREATE TABLE IF NOT EXISTS companies (
-            company_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            company_name TEXT NOT NULL UNIQUE
-        )""";
+    private final String dbUrl;
 
-    private static final String CREATE_JOBS_TABLE = """
-        CREATE TABLE IF NOT EXISTS jobs (
-            job_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            company_id INTEGER NOT NULL,
-            job_title TEXT NOT NULL,
-            job_description TEXT NOT NULL,
-            average_percentage REAL NOT NULL,
-            user_count INTEGER NOT NULL DEFAULT 1,
-            FOREIGN KEY (company_id) REFERENCES companies(company_id)
-        )""";
+    public jobdao(String dbUrl) {
+        this.dbUrl = dbUrl;
+    }
+
+    public jobdao() {
+        this("jdbc:sqlite:main.db");
+    }
 
     public void initializeTables() throws SQLException {
-        try (Connection conn = databaseconnection.getInstance();
+        try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.execute(CREATE_COMPANIES_TABLE);
-            stmt.execute(CREATE_JOBS_TABLE);
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS companies (
+                    companyId INTEGER PRIMARY KEY AUTOINCREMENT,
+                    companyName TEXT NOT NULL UNIQUE
+                )""");
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS jobs (
+                    jobId INTEGER PRIMARY KEY AUTOINCREMENT,
+                    companyId INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    description TEXT,
+                    avgPercentage REAL NOT NULL,
+                    userCount INTEGER DEFAULT 1,
+                    FOREIGN KEY (companyId) REFERENCES companies(companyId),
+                    UNIQUE(companyId, title)
+                )""");
         }
     }
 
-    // Add a new company
     public int addCompany(String companyName) throws SQLException {
-        String sql = "INSERT INTO companies (company_name) VALUES (?)";
-        try (Connection conn = databaseconnection.getInstance();
+        String sql = "INSERT INTO companies (companyName) VALUES (?)";
+        try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, companyName);
             pstmt.executeUpdate();
@@ -44,42 +49,72 @@ public class jobdao {
         }
     }
 
-    // Add a new job position
-    public void addJob(int companyId, String jobTitle, double averagePercentage) throws SQLException {
+    public void addJob(int companyId, String title, String description, double avgPercentage) throws SQLException {
         String sql = """
-            INSERT INTO jobs (company_id, job_title, average_percentage)
-            VALUES (?, ?, ?)
-            ON CONFLICT(company_id, job_title) 
+            INSERT INTO jobs (companyId, title, description, avgPercentage)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(companyId, title) 
             DO UPDATE SET 
-                average_percentage = ((average_percentage * user_count) + ?) / (user_count + 1),
-                user_count = user_count + 1""";
+                description = excluded.description,
+                avgPercentage = ((avgPercentage * userCount) + excluded.avgPercentage) / (userCount + 1),
+                userCount = userCount + 1""";
 
-        try (Connection conn = databaseconnection.getInstance();
+        try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, companyId);
-            pstmt.setString(2, jobTitle);
-            pstmt.setDouble(3, averagePercentage);
-            pstmt.setDouble(4, averagePercentage);
+            pstmt.setString(2, title);
+            pstmt.setString(3, description);
+            pstmt.setDouble(4, avgPercentage);
             pstmt.executeUpdate();
         }
     }
 
-    // Get all jobs for a company
-    public List<String> getCompanyJobs(int companyId) throws SQLException {
-        List<String> jobs = new ArrayList<>();
-        String sql = "SELECT job_title, average_percentage FROM jobs WHERE company_id = ?";
+    public List<job.JobListing> getCompanyJobs(int companyId) throws SQLException {
+        List<job.JobListing> jobs = new ArrayList<>();
+        String sql = """
+            SELECT title, description, avgPercentage, userCount 
+            FROM jobs 
+            WHERE companyId = ?""";
 
-        try (Connection conn = databaseconnection.getInstance();
+        try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, companyId);
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                jobs.add(String.format("%s (%.1f%%)",
-                        rs.getString("job_title"),
-                        rs.getDouble("average_percentage")));
+                jobs.add(new job.JobListing(
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getDouble("avgPercentage")
+                ));
             }
         }
         return jobs;
+    }
+
+    public job getCompanyWithJobs(int companyId) throws SQLException {
+        String nameSql = "SELECT companyName FROM companies WHERE companyId = ?";
+        String companyName;
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(nameSql)) {
+            pstmt.setInt(1, companyId);
+            ResultSet rs = pstmt.executeQuery();
+            if (!rs.next()) throw new SQLException("Company not found");
+            companyName = rs.getString("companyName");
+        }
+
+        job company = new job(companyId, companyName);
+        for (job.JobListing job : getCompanyJobs(companyId)) {
+            company.addJob(
+                    job.getTitle(),
+                    job.getDescription(),
+                    job.getAvgPercentage()
+            );
+        }
+        return company;
+    }
+
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(dbUrl);
     }
 }
