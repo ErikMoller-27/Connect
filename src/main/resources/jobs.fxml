@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="jobcontroller">
+
+    <HBox style="-fx-padding: 15; -fx-spacing: 10;">
+        <TextField fx:id="searchfield"
+                   promptText="Search jobs..."
+                   style="-fx-pref-width: 300;"/>
+        <Button text="Search"
+                onAction="#handlesearch"/>
+    </HBox>
+
+    <ListView fx:id="joblist"/>
+</VBox>

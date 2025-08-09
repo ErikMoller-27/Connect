@@ -1,0 +1,28 @@
+.root {
+    -fx-font-family: 'Segoe UI';
+    -fx-base: #f0f0f0;
+}
+
+.button {
+    -fx-background-color: #34a853;
+    -fx-text-fill: white;
+    -fx-padding: 8 15;
+}
+
+.list-view {
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+.auth-button {
+    -fx-background-color: #4285F4;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-pref-width: 120px;
+    -fx-pref-height: 40px;
+}
+
+.name-field {
+    -fx-pref-width: 250px;
+    -fx-pref-height: 35px;
+}

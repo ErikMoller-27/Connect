@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.profilecontroller">
+
+    <TabPane fx:id="maintabs">
+        <Tab text="Profile">
+            <Label text="Profile content goes here"/>
+        </Tab>
+        <Tab text="Jobs">
+            <fx:include source="jobs.fxml" />
+        </Tab>
+    </TabPane>
+</VBox>
