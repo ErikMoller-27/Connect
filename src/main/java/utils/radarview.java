@@ -86,7 +86,7 @@ public class radarview extends Pane {
         for (int i = 0; i < 6; i++) {
             double start = -90 + i * segAngle; // start angle degrees (top, clockwise)
             // track: full thickness
-            g.setFill(Color.rgb(0,0,0,12)); // light grey
+            g.setFill(Color.rgb(0,0,0,0.12)); // light grey (12% opacity)
             fillRingWedge(g, cx, cy, outer, innerBase, start, segAngle);
         }
 
