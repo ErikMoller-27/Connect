@@ -96,19 +96,66 @@ public class aiclientgemini {
     }
 
     private String build_prompt(List<String> keywords) {
-        return "You are scoring a candidate based on resume/cover letter text.\n"
-                + "Return ONLY valid JSON with this exact shape:\n"
-                + "{ \"scores\": {\"KEY\": 0-100, ...} }\n"
-                + "Use ONLY these keys exactly as spelled: " + keywords + "\n"
-                + "Rubric:\n"
-                + "- Leadership: leads people/outcomes.\n"
-                + "- Communication: writing, presentations, stakeholder updates.\n"
-                + "- Technical: tools, languages, systems.\n"
-                + "- ProblemSolving: debugging, analysis, optimisation.\n"
-                + "- Adaptability: learning new tools, switching contexts.\n"
-                + "- Innovation: initiating improvements/new ideas.\n"
-                + "Respond with integers 0–100 for each key.";
+        return """
+You are scoring a candidate based ONLY on the resume/cover-letter text below.
+
+Return ONLY valid JSON with EXACTLY these keys and integer values 0–100:
+{
+  "scores": {
+    "Education": 0-100,
+    "ProgrammingSkills": 0-100,
+    "Certifications": 0-100,
+    "Projects": 0-100,
+    "Collaboration": 0-100,
+    "Experience": 0-100
+  }
+}
+Requirements:
+- Output JSON only (no prose, no code fences).
+- Include ALL six keys even if a score is 0.
+- Do NOT add, remove, rename, or nest keys.
+- Use only integers.
+
+Scoring anchors (apply to EACH key):
+- 0   = no evidence
+- 25  = weak/generic mention
+- 50  = some concrete evidence; moderate relevance
+- 75  = strong, repeated evidence with clear outcomes
+- 100 = exceptional, sustained, quantified outcomes
+
+Definitions and guardrails:
+
+- Education:
+  Degree level (PhD/Masters/Bachelor/Cert), GPA or % (e.g., 3.7/4.0, 85/100), honours/Dean’s list/scholarships,
+  relevant coursework/research/thesis. If the institution is explicitly named and widely recognized as top-tier,
+  treat as stronger evidence. If ranking isn’t stated, DO NOT guess.
+
+- ProgrammingSkills:
+  Breadth/depth of coding ability and currency (versions/paradigms). Evidence: languages, frameworks, tools,
+  repos/competitions, complexity tackled. Do NOT credit certifications here unless applied skill evidence is shown.
+
+- Certifications:
+  Recognized credentials (vendor + level + year), relevance to IT roles. Do NOT infer skill level beyond what the cert states.
+  Prefer recent/advanced certifications. Count unique certs; avoid double counting.
+
+- Projects:
+  Discrete initiatives (academic/personal/OSS/enterprise) with scope, stack, ownership, deployment/real users, and results.
+  **Anti–double-count rule:** If a project occurred inside a job, credit impact/complexity here; credit tenure/title under Experience.
+
+- Collaboration:
+  Teamwork and stakeholder interaction: cross-functional work, documentation, presentations/demos, mentorship, code reviews.
+  Evidence should indicate influence/clarity; mere team membership is weak evidence.
+
+- Experience:
+  Roles/titles, duration and continuity, progression, domain relevance, scale (users/clients/regions).
+  **Anti–double-count rule:** Focus on tenure/scope/responsibilities; do not re-count individual project impact already scored in Projects.
+
+General rules:
+- Use ONLY the supplied text. If evidence is weak/absent for a key, assign a low score rather than guessing.
+- Be conservative when details are ambiguous.
+""";
     }
+
 
     private String safe_text(String t) {
         if (t == null) return "";

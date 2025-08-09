@@ -41,8 +41,15 @@ public class apptest {
             System.out.println("\n[debug] gemini key configured: " + (keySet != null && !keySet.isBlank()));
 
             var ai = new aiclientgemini();
+
+            // new fixed, future-proof keys
             List<String> keywords = List.of(
-                    "Leadership","Communication","Technical","ProblemSolving","Adaptability","Innovation"
+                    "Education",
+                    "ProgrammingSkills",
+                    "Certifications",
+                    "Projects",
+                    "Collaboration",
+                    "Experience"
             );
 
             String userId = "demo-user";
@@ -52,6 +59,10 @@ public class apptest {
 
             System.out.println("\nAI scores:");
             scores.forEach((k,v) -> System.out.println(" - " + k + ": " + v + "%"));
+
+            if (scores.size() != 6) {
+                System.out.println("[warn] expected 6 keys, got " + scores.size());
+            }
         } catch (Exception e) {
             System.out.println("\nAI call failed: " + e.getMessage());
             e.printStackTrace(System.out);
