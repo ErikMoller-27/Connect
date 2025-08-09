@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -9,8 +10,13 @@
       spacing="10"
       alignment="CENTER">
 
-    <Label text="Welcome to RadialMatch" style="-fx-font-size: 20;"/>
-    <TextField fx:id="usernameField" promptText="Enter username"/>
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15"/>
+    </padding>
+
+    <Label text="Welcome to RadialMatch" style="-fx-font-size: 20px;"/>
+    <TextField fx:id="usernameField" promptText="Enter username" prefWidth="250"/>
+
     <HBox spacing="10" alignment="CENTER">
         <Button fx:id="loginButton" text="Login" onAction="#handleLogin"/>
         <Button fx:id="signupButton" text="Sign Up" onAction="#handleSignup"/>
