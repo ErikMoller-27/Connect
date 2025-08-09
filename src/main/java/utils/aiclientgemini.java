@@ -95,66 +95,80 @@ public class aiclientgemini {
         }
     }
 
+
     private String build_prompt(List<String> keywords) {
         return """
 You are scoring a candidate based ONLY on the resume/cover-letter text below.
 
 Return ONLY valid JSON with EXACTLY these keys and integer values 0–100:
 {
-  "scores": {
-    "Education": 0-100,
-    "ProgrammingSkills": 0-100,
-    "Certifications": 0-100,
-    "Projects": 0-100,
-    "Collaboration": 0-100,
-    "Experience": 0-100
-  }
+"scores": {
+"Education": 0-100,
+"ProgrammingSkills": 0-100,
+"Certifications": 0-100,
+"Projects": 0-100,
+"Collaboration": 0-100,
+"Experience": 0-100
+}
 }
 Requirements:
 - Output JSON only (no prose, no code fences).
 - Include ALL six keys even if a score is 0.
 - Do NOT add, remove, rename, or nest keys.
-- Use only integers.
+- Use integers 0–100 with FINE-GRAINED values (e.g., 17, 34, 62, 98).
+- Do NOT default to anchor values {0, 25, 50, 75, 100} unless the evidence lands EXACTLY on an anchor.
 
-Scoring anchors (apply to EACH key):
-- 0   = no evidence
-- 25  = weak/generic mention
-- 50  = some concrete evidence; moderate relevance
-- 75  = strong, repeated evidence with clear outcomes
-- 100 = exceptional, sustained, quantified outcomes
+Scoring method (apply to EACH key):
+1) Estimate an evidence strength E in [0,1] using:
+- Specificity/clarity of claims (concrete roles, tools, outcomes)
+- Quantity/density of relevant evidence across the document
+- Recency/currency where applicable
+- Scale/impact when numbers are provided (GPA, users, uptime, latency, etc.)
+2) Convert to a continuous score S = round(100 * E).
+3) Apply small adjustments (±1–10) for:
++ Quantified outcomes, awards/honours, promotions, advanced credentials
+− Vague wording, lack of recency, unclear scope/impact
+4) Result must be an integer 0–100 (not restricted to multiples of 5).
 
-Definitions and guardrails:
+Calibration bands (guidance, NOT hard buckets):
+- 0–9: no substantive evidence
+- 10–24: weak/isolated mentions
+- 25–49: some concrete evidence; limited depth/scope
+- 50–74: solid, recurring evidence; good relevance
+- 75–89: strong, sustained evidence with outcomes
+- 90–100: exceptional breadth/depth and clearly quantified impact
+
+Definitions & guardrails:
 
 - Education:
-  Degree level (PhD/Masters/Bachelor/Cert), GPA or % (e.g., 3.7/4.0, 85/100), honours/Dean’s list/scholarships,
-  relevant coursework/research/thesis. If the institution is explicitly named and widely recognized as top-tier,
-  treat as stronger evidence. If ranking isn’t stated, DO NOT guess.
+Degree level, GPA/%, honours/scholarships, relevant coursework/research/thesis.
+If a top-tier institution is explicitly named, treat as stronger evidence; do NOT guess ranking if unstated.
 
 - ProgrammingSkills:
-  Breadth/depth of coding ability and currency (versions/paradigms). Evidence: languages, frameworks, tools,
-  repos/competitions, complexity tackled. Do NOT credit certifications here unless applied skill evidence is shown.
+Breadth/depth of coding ability and currency (versions/paradigms). Evidence: languages, frameworks, tools, repos/competitions, complexity tackled.
+Do NOT credit certifications here unless there is applied skill evidence in text.
 
 - Certifications:
-  Recognized credentials (vendor + level + year), relevance to IT roles. Do NOT infer skill level beyond what the cert states.
-  Prefer recent/advanced certifications. Count unique certs; avoid double counting.
+Recognized credentials (vendor + level + year) and relevance. Do NOT infer mastery beyond what’s stated.
 
 - Projects:
-  Discrete initiatives (academic/personal/OSS/enterprise) with scope, stack, ownership, deployment/real users, and results.
-  **Anti–double-count rule:** If a project occurred inside a job, credit impact/complexity here; credit tenure/title under Experience.
+Discrete initiatives (academic/personal/OSS/enterprise) with scope, stack, ownership, deployment/real users, and results.
+Anti–double-count: impact/complexity goes here; tenure/title stays under Experience.
 
 - Collaboration:
-  Teamwork and stakeholder interaction: cross-functional work, documentation, presentations/demos, mentorship, code reviews.
-  Evidence should indicate influence/clarity; mere team membership is weak evidence.
+Teamwork and stakeholder interaction: cross-functional work, docs, presentations/demos, mentorship, reviews.
+Mere team membership without evidence of contribution is weak.
 
 - Experience:
-  Roles/titles, duration and continuity, progression, domain relevance, scale (users/clients/regions).
-  **Anti–double-count rule:** Focus on tenure/scope/responsibilities; do not re-count individual project impact already scored in Projects.
+Roles/titles, duration/continuity, progression, domain relevance, scale (users/clients/regions).
+Anti–double-count: focus on tenure/scope/responsibilities; don’t re-count project impact.
 
 General rules:
-- Use ONLY the supplied text. If evidence is weak/absent for a key, assign a low score rather than guessing.
-- Be conservative when details are ambiguous.
+- Use ONLY the supplied text; be conservative when ambiguous.
+- Prefer granular integers over anchors; avoid rounding to 0/25/50/75/100 unless truly warranted.
 """;
     }
+
 
 
     private String safe_text(String t) {

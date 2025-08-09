@@ -59,6 +59,31 @@ public class userdao {
         }
     }
 
+    /**
+     * Replace all skills for a user in a single transaction (prevents duplicates).
+     * Deletes existing rows for userId, then inserts the provided (subject, percentage) pairs.
+     */
+    public void replaceSkills(int userId, Map<String, Integer> skills) throws SQLException {
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement del = conn.prepareStatement("DELETE FROM skills WHERE userId = ?")) {
+                del.setInt(1, userId);
+                del.executeUpdate();
+            }
+            try (PreparedStatement ins = conn.prepareStatement(
+                    "INSERT INTO skills (userId, subject, percentage) VALUES (?, ?, ?)")) {
+                for (Map.Entry<String, Integer> e : skills.entrySet()) {
+                    ins.setInt(1, userId);
+                    ins.setString(2, e.getKey());
+                    ins.setInt(3, e.getValue());
+                    ins.addBatch();
+                }
+                ins.executeBatch();
+            }
+            conn.commit();
+        }
+    }
+
     public Map<String, Integer> getSkills(int userId) throws SQLException {
         Map<String, Integer> skills = new HashMap<>();
         String sql = "SELECT subject, percentage FROM skills WHERE userId = ?";
@@ -110,5 +135,4 @@ public class userdao {
             }
         }
     }
-
 }
