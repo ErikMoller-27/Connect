@@ -6,31 +6,33 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class app {
-    public static void main(String[] args) {
-        Application.launch(MainApp.class, args);
+public class app extends Application {
+
+    private static Stage primaryStage; // Store stage so we can change scenes later
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        primaryStage = stage;
+        showLoginScreen(); // Show login on startup
     }
 
-    public static class MainApp extends Application {
-        private static Stage primaryStage;
+    public static void main(String[] args) {
+        launch();
+    }
 
-        @Override
-        public void start(Stage stage) throws Exception {
-            primaryStage = stage;
-            showAuthScreen();
-        }
+    public static void showLoginScreen() throws Exception {
+        FXMLLoader loader = new FXMLLoader(app.class.getResource("/login.fxml"));
+        Parent root = loader.load();
+        primaryStage.setScene(new Scene(root));
+        primaryStage.setTitle("Login");
+        primaryStage.show();
+    }
 
-        public static void showAuthScreen() throws Exception {
-            Parent root = FXMLLoader.load(MainApp.class.getResource("/auth.fxml"));
-            primaryStage.setTitle("RadialMatch - Login");
-            primaryStage.setScene(new Scene(root, 400, 400));
-            primaryStage.show();
-        }
-
-        public static void showMainScreen() throws Exception {
-            Parent root = FXMLLoader.load(MainApp.class.getResource("/main.fxml"));
-            primaryStage.setTitle("RadialMatch - Main");
-            primaryStage.setScene(new Scene(root, 800, 600));
-        }
+    public static void showMainScreen() throws Exception {
+        FXMLLoader loader = new FXMLLoader(app.class.getResource("/main.fxml")); // change to your main screen fxml
+        Parent root = loader.load();
+        primaryStage.setScene(new Scene(root));
+        primaryStage.setTitle("Main Screen");
+        primaryStage.show();
     }
 }

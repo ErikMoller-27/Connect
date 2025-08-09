@@ -1,11 +1,12 @@
 package controllers;
 
 import DAO.userdao;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import utils.session;
 
 import java.sql.SQLException;
 import java.util.Map;
@@ -16,17 +17,23 @@ public class profilecontroller {
     @FXML private ListView<String> skillsList;
 
     private userdao userDao = new userdao();
-    private int userId;
 
-    // Call this to load user data for a given userId
-    public void loadUserProfile(int userId) {
-        this.userId = userId;
+    @FXML
+    public void initialize() {
+        int userId = session.getCurrentUserId();
+        System.out.println("Profile controller initialized with userId = " + userId);
+        if (userId == -1) {
+            nameLabel.setText("No valid user loaded! Cannot load profile.");
+            System.out.println("No logged in user in session.");
+            return;
+        }
+
         try {
-            var userProfile = userDao.getUserProfile(userId);
-            nameLabel.setText(userProfile.getFirstName());
+            var profile = userDao.getUserProfile(userId);
+            nameLabel.setText(profile.getFirstName());
 
             ObservableList<String> skillItems = FXCollections.observableArrayList();
-            for (Map.Entry<String, Integer> entry : userProfile.getSkills().entrySet()) {
+            for (Map.Entry<String, Integer> entry : profile.getSkills().entrySet()) {
                 skillItems.add(entry.getKey() + ": " + entry.getValue() + "%");
             }
             skillsList.setItems(skillItems);
@@ -36,4 +43,6 @@ public class profilecontroller {
             nameLabel.setText("Error loading user");
         }
     }
+
+    // For brevity, upload resume code omitted here, can be added as needed
 }

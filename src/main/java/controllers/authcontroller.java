@@ -4,7 +4,8 @@ import DAO.userdao;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import app.app; // Import the outer App class
+import utils.session;
+import app.app;  // Your main app class for screen switching
 
 public class authcontroller {
     @FXML private TextField usernameField;
@@ -16,7 +17,7 @@ public class authcontroller {
     @FXML
     public void initialize() {
         try {
-            userDao.initializeTables(); // Make sure tables exist
+            userDao.initializeTables();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -30,10 +31,10 @@ public class authcontroller {
                 int userId = userDao.getUserIdByName(username);
                 if (userId != -1) {
                     System.out.println("Logged in as existing user: " + username + " (ID: " + userId + ")");
-                    app.MainApp.showMainScreen();
+                    session.setCurrentUserId(userId);   // Save logged in user globally
+                    app.showMainScreen();                // Switch screen
                 } else {
                     System.out.println("User not found, please sign up first.");
-                    // Optionally show an alert dialog here
                 }
             }
         } catch (Exception e) {
@@ -50,19 +51,14 @@ public class authcontroller {
                 if (existingUserId == -1) {
                     int userId = userDao.createUser(username);
                     System.out.println("Created new user: " + username + " (ID: " + userId + ")");
-                    app.MainApp.showMainScreen();
+                    session.setCurrentUserId(userId);  // Save logged in user globally
+                    app.showMainScreen();               // Switch screen
                 } else {
                     System.out.println("User already exists, please login instead.");
-                    // Optionally show an alert dialog here
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private int findOrCreateUser(String username) throws Exception {
-        // For now, always create new (can change later to check DB)
-        return userDao.createUser(username);
     }
 }
