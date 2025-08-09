@@ -1,10 +1,12 @@
 package utils;
 
 import utils.textextractor.ExtractionResult;
+import DAO.userdao;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class apptest {
     public static void main(String[] args) {
@@ -34,7 +36,7 @@ public class apptest {
         System.out.println("\n--- PREVIEW (first " + head + " chars) ---\n");
         if (head > 0) System.out.println(text.substring(0, head));
 
-        // 3) AI call (Gemini)
+        // 3) AI call (Gemini) + DB save + show animation
         try {
             // debug: confirm env is visible
             String keySet = System.getenv("GEMINI_API_KEY");
@@ -42,7 +44,7 @@ public class apptest {
 
             var ai = new aiclientgemini();
 
-            // new fixed, future-proof keys
+            // fixed keys
             List<String> keywords = List.of(
                     "Education",
                     "ProgrammingSkills",
@@ -52,19 +54,48 @@ public class apptest {
                     "Experience"
             );
 
-            String userId = "demo-user";
-            String jobId  = "demo-job";
+            // identifiers (swap to your real logged-in user/job later)
+            String userIdName = "demo-user";
+            String jobId      = "demo-job";
 
-            Map<String,Integer> scores = ai.score(userId, jobId, text, keywords);
+            Map<String,Integer> scores = ai.score(userIdName, jobId, text, keywords);
 
             System.out.println("\nAI scores:");
             scores.forEach((k,v) -> System.out.println(" - " + k + ": " + v + "%"));
-
             if (scores.size() != 6) {
                 System.out.println("[warn] expected 6 keys, got " + scores.size());
             }
+
+            // ---- DB: replace existing skills (no duplicates)
+            userdao dao = new userdao(); // uses jdbc:sqlite:main.db
+            dao.initializeTables();
+
+            int userId = dao.getUserIdByName(userIdName);
+            if (userId < 0) userId = dao.createUser(userIdName);
+
+            // enforce exactly-six map in a stable order
+            Map<String,Integer> six = new LinkedHashMap<>();
+            six.put("Education",          scores.getOrDefault("Education", 0));
+            six.put("ProgrammingSkills",  scores.getOrDefault("ProgrammingSkills", 0));
+            six.put("Certifications",     scores.getOrDefault("Certifications", 0));
+            six.put("Projects",           scores.getOrDefault("Projects", 0));
+            six.put("Collaboration",      scores.getOrDefault("Collaboration", 0));
+            six.put("Experience",         scores.getOrDefault("Experience", 0));
+
+            dao.replaceSkills(userId, six);
+            System.out.println("[db] replaced 6 skills for userId=" + userId);
+
+            // 👇 show the animated radar window here
+            utils.fxradarwindow.show(six);
+
+            // optional log-friendly CSV snapshot
+            String subjectsCsv = String.join(",", six.keySet());
+            String valuesCsv = six.values().stream().map(String::valueOf)
+                    .reduce((a,b) -> a + "," + b).orElse("");
+            System.out.println("[snapshot] " + subjectsCsv + " = " + valuesCsv);
+
         } catch (Exception e) {
-            System.out.println("\nAI call failed: " + e.getMessage());
+            System.out.println("\nAI/DB step failed: " + e.getMessage());
             e.printStackTrace(System.out);
         }
     }
