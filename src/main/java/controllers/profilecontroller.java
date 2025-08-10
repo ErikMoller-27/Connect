@@ -3,15 +3,20 @@ package controllers;
 import DAO.userdao;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import utils.aiclientgemini;
 import utils.fileuploader;
+import utils.fxradarwindow;
 import utils.textextractor;
 
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,11 +24,12 @@ public class profilecontroller {
 
     @FXML private Label nameLabel;
     @FXML private ListView<String> skillsList;
+    @FXML private Button uploadResumeButton;
 
-    private userdao userDao = new userdao();
+    private final userdao userDao = new userdao();
     private int userId;
 
-    // Call this to load user data for a given userId
+    // Load user data for a given userId (called by whoever navigates to Profile)
     public void loadUserProfile(int userId) {
         this.userId = userId;
         try {
@@ -44,77 +50,93 @@ public class profilecontroller {
 
     @FXML
     private void handleUploadResume() {
-        // Pick files/folders from user
+        // 1) Pick files (Swing chooser you already have)
         List<Path> files = fileuploader.pickFiles();
         if (files.isEmpty()) {
             System.out.println("No files selected.");
             return;
         }
 
-        // Extract text from selected files
-        textextractor extractor = new textextractor();
-        var result = extractor.extract(files);
+        // disable button while processing
+        uploadResumeButton.setDisable(true);
+        uploadResumeButton.setText("Processing…");
 
-        // Show extraction errors if any
-        if (!result.files().isEmpty()) {
-            result.files().stream()
-                    .filter(f -> !f.succeeded())
-                    .forEach(f -> System.out.println("Error reading " + f.name + ": " + f.error));
-        }
+        // 2) Heavy work off the UI thread
+        Task<Map<String,Integer>> task = new Task<>() {
+            @Override
+            protected Map<String, Integer> call() throws Exception {
+                // Extract
+                textextractor extractor = new textextractor();
+                var result = extractor.extract(files);
 
-        String resumeText = result.text();
-        if (resumeText.isBlank()) {
-            System.out.println("No text extracted from resume.");
-            return;
-        }
+                // Log any per-file errors (non-fatal)
+                result.files().stream()
+                        .filter(f -> !f.succeeded())
+                        .forEach(f -> System.out.println("Error reading " + f.name + ": " + f.error));
 
-        // Define the keywords your AI expects to score
-        List<String> keywords = List.of("Education", "ProgrammingSkills", "Certifications", "Projects", "Collaboration", "Experience");
+                String resumeText = result.text();
+                if (resumeText.isBlank()) {
+                    throw new IllegalArgumentException("No text extracted from resume.");
+                }
 
-        // Call AI client
-        aiclientgemini aiClient = new aiclientgemini();
-        try {
-            Map<String, Integer> scores = aiClient.score(
-                    String.valueOf(userId),   // userId as string
-                    null,                     // jobId, if applicable
-                    resumeText,
-                    keywords
-            );
+                // 3) AI call (fixed 6 keys)
+                List<String> keys = List.of(
+                        "Education","ProgrammingSkills","Certifications",
+                        "Projects","Collaboration","Experience"
+                );
+                aiclientgemini ai = new aiclientgemini();
+                Map<String,Integer> raw = ai.score(String.valueOf(userId), null, resumeText, keys);
 
-            // Print scores or update UI
-            System.out.println("Resume scores:");
-            scores.forEach((k,v) -> System.out.println(k + ": " + v));
+                // 4) Stable ordered map with all six keys
+                Map<String,Integer> six = new LinkedHashMap<>();
+                six.put("Education",          raw.getOrDefault("Education", 0));
+                six.put("ProgrammingSkills",  raw.getOrDefault("ProgrammingSkills", 0));
+                six.put("Certifications",     raw.getOrDefault("Certifications", 0));
+                six.put("Projects",           raw.getOrDefault("Projects", 0));
+                six.put("Collaboration",      raw.getOrDefault("Collaboration", 0));
+                six.put("Experience",         raw.getOrDefault("Experience", 0));
 
-            // Save the AI-generated scores into the database under "IT" subject
-            // Wrap the scores map into a single key "IT" with the list of scores in order as a string (if you want)
-            // Or save each keyword as its own row with subject = keyword (better for querying)
-            // But per your request, subject is "IT" and percentages is a list
-            // So we save with subject = "IT" and convert Map<String,Integer> scores to a JSON-like string or CSV string
-            // For simplicity, here we save each keyword as its own skill row with subject = keyword
+                // 5) Persist (no resumes stored—just key/value scores)
+                userDao.initializeTables();
+                userDao.replaceSkills(userId, six);
 
-            // Uncomment this if you want to save all keywords under one subject "IT" as a CSV string (not currently supported)
-            // userDao.replaceSkills(userId, Map.of("IT", serializeScores(scores)));
+                return six;
+            }
+        };
 
-            // Instead, save each keyword as a separate skill subject for easier retrieval:
-            userDao.replaceSkills(userId, scores);
+        task.setOnSucceeded(e -> {
+            Map<String,Integer> six = task.getValue();
 
-            // Update skills list in UI with the AI scores
-            ObservableList<String> skillItems = FXCollections.observableArrayList();
-            scores.forEach((k,v) -> skillItems.add(k + ": " + v + "%"));
-            skillsList.setItems(skillItems);
+            // Update list UI
+            ObservableList<String> items = FXCollections.observableArrayList();
+            six.forEach((k,v) -> items.add(k + ": " + v + "%"));
+            skillsList.setItems(items);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("AI scoring failed: " + e.getMessage());
-        }
+            // re-enable button
+            uploadResumeButton.setDisable(false);
+            uploadResumeButton.setText("Upload Resume");
+
+            // Show animated radar in a background thread so FX thread stays free
+            new Thread(() -> fxradarwindow.showAndWait(six), "radar-modal").start();
+        });
+
+        task.setOnFailed(e -> {
+            // re-enable button
+            uploadResumeButton.setDisable(false);
+            uploadResumeButton.setText("Upload Resume");
+
+            var ex = task.getException();
+            if (ex != null) ex.printStackTrace();
+            alert("Upload failed", (ex != null ? ex.getMessage() : "Unknown error"));
+        });
+
+        new Thread(task, "resume-upload-pipeline").start();
     }
 
-    // Optional helper to serialize map values as CSV if needed
-    /*
-    private String serializeScores(Map<String, Integer> scores) {
-        return scores.values().stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(","));
+    private void alert(String title, String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setHeaderText(title);
+        a.setContentText(msg);
+        a.showAndWait();
     }
-    */
 }
