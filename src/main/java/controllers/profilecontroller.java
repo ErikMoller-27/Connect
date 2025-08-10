@@ -56,7 +56,11 @@ public class profilecontroller {
         var result = extractor.extract(files);
 
         // Show extraction errors if any
-
+        if (!result.files().isEmpty()) {
+            result.files().stream()
+                    .filter(f -> !f.succeeded())
+                    .forEach(f -> System.out.println("Error reading " + f.name + ": " + f.error));
+        }
 
         String resumeText = result.text();
         if (resumeText.isBlank()) {
@@ -81,6 +85,19 @@ public class profilecontroller {
             System.out.println("Resume scores:");
             scores.forEach((k,v) -> System.out.println(k + ": " + v));
 
+            // Save the AI-generated scores into the database under "IT" subject
+            // Wrap the scores map into a single key "IT" with the list of scores in order as a string (if you want)
+            // Or save each keyword as its own row with subject = keyword (better for querying)
+            // But per your request, subject is "IT" and percentages is a list
+            // So we save with subject = "IT" and convert Map<String,Integer> scores to a JSON-like string or CSV string
+            // For simplicity, here we save each keyword as its own skill row with subject = keyword
+
+            // Uncomment this if you want to save all keywords under one subject "IT" as a CSV string (not currently supported)
+            // userDao.replaceSkills(userId, Map.of("IT", serializeScores(scores)));
+
+            // Instead, save each keyword as a separate skill subject for easier retrieval:
+            userDao.replaceSkills(userId, scores);
+
             // Update skills list in UI with the AI scores
             ObservableList<String> skillItems = FXCollections.observableArrayList();
             scores.forEach((k,v) -> skillItems.add(k + ": " + v + "%"));
@@ -91,4 +108,13 @@ public class profilecontroller {
             System.out.println("AI scoring failed: " + e.getMessage());
         }
     }
+
+    // Optional helper to serialize map values as CSV if needed
+    /*
+    private String serializeScores(Map<String, Integer> scores) {
+        return scores.values().stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+    }
+    */
 }

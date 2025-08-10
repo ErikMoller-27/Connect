@@ -1,8 +1,11 @@
 package DAO;
 
 import models.user;
+import utils.databaseconnection;
+
 import java.sql.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class userdao {
     private final String dbUrl;
@@ -12,7 +15,7 @@ public class userdao {
     }
 
     public userdao() {
-        this("jdbc:sqlite:main.db");
+        this("jdbc:sqlite:./data/prototype.db");  // use your shared DB path here
     }
 
     public void initializeTables() throws SQLException {
@@ -84,6 +87,16 @@ public class userdao {
         }
     }
 
+    // New method to add AI-generated skill scores (each keyword as subject)
+    public void addAISkills(int userId, Map<String, Integer> aiScores) throws SQLException {
+        addSkills(userId, aiScores);
+    }
+
+    // New method to replace AI-generated skill scores (delete existing, insert new)
+    public void replaceAISkills(int userId, Map<String, Integer> aiScores) throws SQLException {
+        replaceSkills(userId, aiScores);
+    }
+
     public Map<String, Integer> getSkills(int userId) throws SQLException {
         Map<String, Integer> skills = new HashMap<>();
         String sql = "SELECT subject, percentage FROM skills WHERE userId = ?";
@@ -119,7 +132,8 @@ public class userdao {
     }
 
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(dbUrl);
+        // Use shared database connection from utils.databaseconnection
+        return databaseconnection.getInstance();
     }
 
     public int getUserIdByName(String firstName) throws SQLException {

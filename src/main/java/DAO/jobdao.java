@@ -1,23 +1,20 @@
 package DAO;
 
 import models.job;
+import utils.databaseconnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class jobdao {
-    private final String dbUrl;
-
-    public jobdao(String dbUrl) {
-        this.dbUrl = dbUrl;
-    }
 
     public jobdao() {
-        this("jdbc:sqlite:main.db");
+        // no dbUrl needed here
     }
 
     public void initializeTables() throws SQLException {
-        try (Connection conn = getConnection();
+        try (Connection conn = databaseconnection.getInstance();
              Statement stmt = conn.createStatement()) {
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS companies (
@@ -40,7 +37,7 @@ public class jobdao {
 
     public int addCompany(String companyName) throws SQLException {
         String sql = "INSERT INTO companies (companyName) VALUES (?)";
-        try (Connection conn = getConnection();
+        try (Connection conn = databaseconnection.getInstance();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, companyName);
             pstmt.executeUpdate();
@@ -59,7 +56,7 @@ public class jobdao {
                 avgPercentage = ((avgPercentage * userCount) + excluded.avgPercentage) / (userCount + 1),
                 userCount = userCount + 1""";
 
-        try (Connection conn = getConnection();
+        try (Connection conn = databaseconnection.getInstance();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, companyId);
             pstmt.setString(2, title);
@@ -76,7 +73,7 @@ public class jobdao {
             FROM jobs 
             WHERE companyId = ?""";
 
-        try (Connection conn = getConnection();
+        try (Connection conn = databaseconnection.getInstance();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, companyId);
             ResultSet rs = pstmt.executeQuery();
@@ -95,7 +92,7 @@ public class jobdao {
     public job getCompanyWithJobs(int companyId) throws SQLException {
         String nameSql = "SELECT companyName FROM companies WHERE companyId = ?";
         String companyName;
-        try (Connection conn = getConnection();
+        try (Connection conn = databaseconnection.getInstance();
              PreparedStatement pstmt = conn.prepareStatement(nameSql)) {
             pstmt.setInt(1, companyId);
             ResultSet rs = pstmt.executeQuery();
@@ -112,9 +109,5 @@ public class jobdao {
             );
         }
         return company;
-    }
-
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(dbUrl);
     }
 }
