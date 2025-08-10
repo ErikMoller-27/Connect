@@ -166,6 +166,7 @@ Anti–double-count: focus on tenure/scope/responsibilities; don’t re-count pr
 General rules:
 - Use ONLY the supplied text; be conservative when ambiguous.
 - Prefer granular integers over anchors; avoid rounding to 0/25/50/75/100 unless truly warranted.
+- Be strict, like really strict
 """;
     }
 

@@ -113,18 +113,16 @@ public class RadarView extends Pane {
             g.strokeLine(cx, cy, x, y);
         }
 
-        // Labels
+        // Labels (without numbers)
         g.setFill(Color.rgb(0,0,0,0.85));
         g.setFont(javafx.scene.text.Font.font("SansSerif", 13));
         for (int i = 0; i < 6; i++) {
             String key = KEYS[i];
-            int val = targets.getOrDefault(key, 0);
-            String label = key + " (" + val + ")";
             double angRad = Math.toRadians(-90 + (i + 0.5) * segAngle);
             double rx = cx + (outer + 24) * Math.cos(angRad);
             double ry = cy + (outer + 24) * Math.sin(angRad);
 
-            Text t = new Text(label);
+            Text t = new Text(key);  // Only using the key now, no numbers
             t.setFont(g.getFont());
             double tw = t.getLayoutBounds().getWidth();
             double th = t.getLayoutBounds().getHeight();
@@ -132,7 +130,7 @@ public class RadarView extends Pane {
             double lx = rx, ly = ry;
             if (Math.cos(angRad) < -0.2) lx -= tw;
             if (Math.abs(Math.cos(angRad)) <= 0.2) ly += th/2;
-            g.fillText(label, lx, ly);
+            g.fillText(key, lx, ly);  // Just drawing the key
         }
     }
 
