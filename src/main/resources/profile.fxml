@@ -22,7 +22,5 @@
 
     <Label text="Skills:" style="-fx-font-weight: bold;"/>
     <ListView fx:id="skillsList" prefHeight="200"/>
-
-    <!-- Upload resume button placeholder -->
-    <Button text="Upload Resume" fx:id="uploadResumeButton" onAction="#handleUploadResume" />
+    <Button fx:id="uploadResumeButton" text="Upload Resume" onAction="#handleUploadResume"/>
 </VBox>
