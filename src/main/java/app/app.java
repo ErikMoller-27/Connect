@@ -13,6 +13,7 @@ public class app {
 
     public static class MainApp extends Application {
         private static Stage primaryStage;
+        private static int loggedInUserId = -1;  // Store logged in user ID globally
 
         @Override
         public void start(Stage stage) throws Exception {
@@ -27,10 +28,22 @@ public class app {
             primaryStage.show();
         }
 
-        public static void showMainScreen() throws Exception {
-            Parent root = FXMLLoader.load(MainApp.class.getResource("/main.fxml"));
+        public static void showMainScreen(int userId) throws Exception {
+            loggedInUserId = userId;
+            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/main.fxml"));
+            Parent root = loader.load();
+
+            // Get controller and pass logged-in user ID
+            controllers.maincontroller mainController = loader.getController();
+            mainController.loadUserProfile(userId);
+
             primaryStage.setTitle("RadialMatch - Main");
             primaryStage.setScene(new Scene(root, 800, 600));
+            primaryStage.show();
+        }
+
+        public static int getLoggedInUserId() {
+            return loggedInUserId;
         }
     }
 }

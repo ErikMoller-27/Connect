@@ -48,11 +48,23 @@ public class textextractor {
         public final String name;
         public final Long sizeBytes;
         public final String error;
+
         private FileStatus(String name, Long sizeBytes, String error) {
-            this.name = name; this.sizeBytes = sizeBytes; this.error = error;
+            this.name = name;
+            this.sizeBytes = sizeBytes;
+            this.error = error;
         }
-        public static FileStatus ok(String name, long size) { return new FileStatus(name, size, null); }
-        public static FileStatus error(String name, String error) { return new FileStatus(name, null, error); }
-        public boolean succeeded() { return error == null; }
+
+        public static FileStatus ok(String name, long size) {
+            return new FileStatus(name, size, null);
+        }
+
+        public static FileStatus error(String name, String error) {
+            return new FileStatus(name, null, error);
+        }
+
+        public boolean succeeded() {
+            return error == null;
+        }
     }
 }
