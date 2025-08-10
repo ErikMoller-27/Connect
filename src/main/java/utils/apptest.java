@@ -84,7 +84,7 @@ public class apptest {
 
 
             // show the animated radar and WAIT until the window is closed
-            utils.fxradarwindow.showAndWait(six);
+            FxRadarWindow.showAndWait(six);
 
             // optional log-friendly CSV snapshot
             String subjectsCsv = String.join(",", six.keySet());

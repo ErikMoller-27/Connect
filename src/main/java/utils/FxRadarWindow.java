@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-public final class fxradarwindow {
+public final class FxRadarWindow {
     private static volatile boolean fxStarted = false;
 
     private static void ensureFxStarted() {
@@ -19,14 +19,13 @@ public final class fxradarwindow {
         try { latch.await(); } catch (InterruptedException ignored) {}
     }
 
-    /** Show the radar and block until the window is closed. */
     public static void showAndWait(Map<String, Integer> scores) {
         ensureFxStarted();
         CountDownLatch closed = new CountDownLatch(1);
 
         Platform.runLater(() -> {
             Stage stage = new Stage();
-            radarview view = new radarview();
+            RadarView view = new RadarView();
             view.setScores(scores);
 
             StackPane root = new StackPane(view);
@@ -34,7 +33,7 @@ public final class fxradarwindow {
 
             stage.setTitle("Career Radar");
             stage.setScene(scene);
-            stage.setOnShown(e -> view.play());     // animate on show
+            stage.setOnShown(e -> view.play());
             stage.setOnCloseRequest(e -> closed.countDown());
             stage.show();
         });
@@ -42,5 +41,5 @@ public final class fxradarwindow {
         try { closed.await(); } catch (InterruptedException ignored) {}
     }
 
-    private fxradarwindow() {}
+    private FxRadarWindow() {}
 }

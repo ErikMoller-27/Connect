@@ -2,7 +2,9 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import utils.RadarView?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -22,5 +24,8 @@
 
     <Label text="Skills:" style="-fx-font-weight: bold;"/>
     <ListView fx:id="skillsList" prefHeight="200"/>
+
+    <RadarView fx:id="radarView" prefWidth="720" prefHeight="560"/>
+
     <Button fx:id="uploadResumeButton" text="Upload Resume" onAction="#handleUploadResume"/>
 </VBox>

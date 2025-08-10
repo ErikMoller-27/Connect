@@ -5,19 +5,20 @@ import utils.AIClientWrapper;
 import utils.fileuploader;
 import utils.textextractor;
 import utils.textextractor.ExtractionResult;
+import utils.RadarView;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 public class profilecontroller {
     @FXML private Label nameLabel;
     @FXML private ListView<String> skillsList;
+    @FXML private RadarView radarView;
 
     private final userdao userDao = new userdao();
     private final AIClientWrapper aiClient = new AIClientWrapper();
@@ -35,7 +36,11 @@ public class profilecontroller {
             for (var entry : skills.entrySet()) {
                 skillsList.getItems().add(entry.getKey() + ": " + entry.getValue() + "%");
             }
-        } catch (SQLException e) {
+
+            radarView.setScores(skills);
+            radarView.play();
+
+        } catch (Exception e) {
             e.printStackTrace();
             nameLabel.setText("Error loading user");
         }
@@ -70,7 +75,6 @@ public class profilecontroller {
 
             userDao.replaceAISkills(currentUserId, scores);
 
-            // Reload skills list after saving
             loadUserProfile(currentUserId);
 
         } catch (Exception e) {
