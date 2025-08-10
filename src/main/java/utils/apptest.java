@@ -82,11 +82,9 @@ public class apptest {
             six.put("Collaboration",      scores.getOrDefault("Collaboration", 0));
             six.put("Experience",         scores.getOrDefault("Experience", 0));
 
-            dao.replaceSkills(userId, six);
-            System.out.println("[db] replaced 6 skills for userId=" + userId);
 
-            // 👇 show the animated radar window here
-            utils.fxradarwindow.show(six);
+            // show the animated radar and WAIT until the window is closed
+            utils.fxradarwindow.showAndWait(six);
 
             // optional log-friendly CSV snapshot
             String subjectsCsv = String.join(",", six.keySet());
